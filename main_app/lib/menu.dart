@@ -25,17 +25,52 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Future<void> fetchSchedule() async {
-    final response = await http.get(Uri.parse('http://127.0.0.1:5000/schedule'));
+    try {
+      final response = await http.get(Uri.parse('http://127.0.0.1:5000/schedule'));
 
-    if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
-      setState(() {
-        scheduleList = data.map((item) => Subject(item['lesson'], item['time'])).toList();
-      });
-    } else {
-      // Обработка ошибок
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        setState(() {
+          scheduleList = data.map((item) => Subject(item['lesson'], item['time'])).toList();
+        });
+      } else {
+        // Обработка ошибок, если сервер вернул ошибочный статус код
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Ошибка'),
+            content: Text('Не удалось загрузить расписание'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      // Обработка ошибок, если запрос завершился неудачно
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Ошибка'),
+          content: Text('Произошла ошибка при загрузке расписания'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -104,14 +139,49 @@ class _MenuPageState extends State<MenuPage> {
   }
 
   Future<void> _deleteSubject(int index) async {
-    final response = await http.delete(Uri.parse('http://127.0.0.1:5000/schedule/$index'));
+    try {
+      final response = await http.delete(Uri.parse('http://127.0.0.1:5000/schedule/$index'));
 
-    if (response.statusCode == 200) {
-      setState(() {
-        scheduleList.removeAt(index);
-      });
-    } else {
-      // Обработка ошибок
+      if (response.statusCode == 200) {
+        setState(() {
+          scheduleList.removeAt(index);
+        });
+      } else {
+        // Обработка ошибок, если сервер вернул ошибочный статус код
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Ошибка'),
+            content: Text('Не удалось удалить предмет из расписания'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      // Обработка ошибок, если запрос завершился неудачно
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Ошибка'),
+          content: Text('Произошла ошибка при удалении предмета из расписания'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
+
 }
